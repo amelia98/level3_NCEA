@@ -1,0 +1,68 @@
+
+#load tkinter library
+from tkinter import *
+import tkinter.messagebox  #need to import this
+
+def processdata():
+#process data, note access to tkinter variables
+
+    uname=name.get().title()
+    print(uname)
+    nameEntry.delete(0,END)
+    print(stock.get())
+    print(genre.get())
+    return
+
+def Quit():
+  #  mExit = messagebox.askyesno(title="Quit", message="Are you sure")
+    mExit = messagebox.askokcancel(title="Quit", message="Are you sure")
+    if mExit >0: #1 is True 0 is False
+        mGui.destroy()
+    return
+
+mGui=Tk()
+
+#variable types that are used by tkinter
+name=StringVar()
+stock=StringVar()
+genre=StringVar()
+
+#primary window
+mGui.geometry('450x450+50+30') #+50 +30 give starting postion on screen
+mGui.title('Book Management System')
+mGui.configure(background = 'gray')
+
+#Simple label used for header
+mlabel = Label(mGui,text='Book Entry',fg='black',bg='white')
+mlabel.grid(row =0, column =0,)
+
+#data entry label and Entry field for text and integer. Includes insertion of default values
+#note the text variables as name and gae as declared above
+nameEntryl = Label(mGui,text='Book Title:',fg='black')
+nameEntryl.grid(row =1, column=0)
+nameEntry = Entry(mGui,textvariable=name)
+nameEntry.insert(10,"title")
+nameEntry.grid(row =1, column =1)
+
+stockEntryl = Label(mGui,text='No. in stock:',fg='black')
+stockEntryl.grid(row =2, column =0)
+stockEntry = Spinbox(mGui, textvariable=stock, from_=0, to_=10, state=NORMAL)
+stockEntry.grid(row =2, column =1)
+
+#obtain data from a pull down list
+genreEntry1 = Label(mGui, text='Genre:',fg="black")
+genreEntry1.grid(row =3, column =0)
+genreEntry=OptionMenu(mGui, genre, "Drama", "Science Fiction", "Sport", "Action and Adventure", "Romance", "Mystery", "Horror", "Travel", "Childrens", "Science", "History", "Biographies")
+genreEntry.grid(row =3, column =1)
+
+#OK button ie event used to initiatiate a command ie processdata
+mbutton = Button(mGui,text="Submit",command=processdata, fg='red')
+mbutton.grid(row =4, column =2)
+
+#QUIT button ie event to quit
+qbutton = Button(mGui,text="Quit",command=Quit, fg='red')
+qbutton.grid(row =4, column =4)
+
+mGui.mainloop()
+
+main()

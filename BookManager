@@ -64,5 +64,3 @@ qbutton = Button(mGui,text="Quit",command=Quit, fg='red')
 qbutton.grid(row =4, column =4)
 
 mGui.mainloop()
-
-main()

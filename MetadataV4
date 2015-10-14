@@ -1,0 +1,243 @@
+#AMELIA HARRIS#
+
+#importing GUI library
+from tkinter import *
+
+#explicitly loading the messagebox
+import tkinter.messagebox
+
+#create the Image class incorporating instance variables and methods
+class Image:
+    def __init__(self, ID_i, filename_i, extension_i, title_i, owner_i, license_i):
+        self.ID = ID_i
+        self.filename= filename_i
+        self.extension= extension_i
+        self.title= title_i
+        self.owner= owner_i
+        self.license= license_i
+
+    def get_ID(self):
+        return self.ID
+
+    def get_filename(self):
+        return self.filename
+
+    def get_extension(self):
+        return self.extension
+
+    def get_title(self):
+        return self.title
+
+    def get_owner(self):
+        return self.owner
+
+    def get_license(self):
+        return self.license
+
+
+#creating the GUI interface
+class GUI:
+
+    def __init__(self):
+
+        #creating the main display window
+        window = Tk()
+        #setting window title
+        window.title("Data Entry Screen")
+        #setting window size
+        window.minsize(width=300, height=225)
+
+        #initializing variables
+        #this variable stores whether the data has been validated or not
+        self.ready_to_write = False
+        #this will contain the list of all images entered via the gui
+        self.recordlist = []
+
+        group = LabelFrame(window, text="Image Data", padx=5, pady=5)
+        group.pack(padx=10, pady=10)
+
+        #creating label and field variable in GUI for each entry field
+        ID_label = Label(group, text='Enter ID:')
+        ID_label.grid(row=0, column=0, sticky ="w") #grid places the field in the window at the row and column specified and sticky is direction ie w is left aligned
+        self.ID_field = Entry(group)
+        self.ID_field.grid(row=0, column=1)
+
+        filename_label = Label(group, text='Enter Filename:')
+        filename_label.grid(row=1, column=0, sticky ="w")
+        self.filename_field = Entry(group)
+        self.filename_field.grid(row=1, column=1)
+
+        #initializing for drop down menu
+        self.extension = StringVar()
+        extension_label = Label(group, text='Enter Extension:')
+        extension_label.grid(row=2, column=0, sticky="w")
+        #list of options to be displayed
+        EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tif"]
+        self.extension_field = OptionMenu(group, self.extension, *EXTENSIONS)
+        self.extension_field.grid(row=2, column=1, sticky="ew")
+
+        title_label = Label(group, text='Enter Title:')
+        title_label.grid(row=3, column=0, sticky ="w")
+        self.title_field = Entry(group)
+        self.title_field.grid(row=3, column=1)
+
+        owner_label = Label(group, text='Enter Owner:')
+        owner_label.grid(row=4, column=0, sticky ="w")
+        self.owner_field = Entry(group)
+        self.owner_field.grid(row=4, column=1)
+
+        self.license = StringVar()
+        license_label = Label(group, text='Enter License:')
+        license_label.grid(row=5, column=0, sticky="w")
+        LICENSES = ["CC0", "BY", "BY-NC", "BY-SA", "BY-ND", "BY-NC-SA", "BY-NC-ND"]
+        self.license_field = OptionMenu(group, self.license, *LICENSES)
+        self.license_field.grid(row=5, column=1, sticky="ew")
+
+        #uses an image for a button
+        self.info_img = PhotoImage(file = "info.ppm")
+        info_button = Button(group, image = self.info_img, command=self.info)
+        info_button.grid(row=5, column=2)
+
+        #creating a button. The command function is run when the button is pressed
+        #the 'command=self.doSubmit' is an example of a callback method
+        button_label = Label(group, text='Press to validate:')
+        button = Button(group, text='Submit', command=self.doSubmit)
+        button_label.grid(row=6, column=0)
+        button.grid(row=6, column=1)
+
+        group1 = LabelFrame(window, text="Record to CSV file", padx=5, pady=5)
+        group1.pack(padx=10, pady=10)
+
+        button1 = Button(group1, text='Overwrite', command=lambda: self.writetocsv('w')) #option to write to file
+        button2 = Button(group1, text='Append', command=lambda: self.writetocsv('a')) #option to append to file
+
+        button1.grid(row=1, column=1, padx=5, pady=5)
+        button2.grid(row=1, column=2, padx=5)
+
+        #waiting for user input - event driven program
+        window.mainloop()
+
+    def doSubmit(self):
+    #this is the callback method for the 'Submit' button
+
+        #making sure there are no duplicate entries
+        noduplicate = True;
+        for record in self.recordlist:
+            if self.ID_field.get() == record.get_ID():
+                noduplicate= False
+                tkinter.messagebox.showwarning('Warning!','Duplicate ID number');
+            if self.filename_field.get() == record.get_filename():
+                if self.extension.get() == record.get_extension():
+                    noduplicate= False
+                    tkinter.messagebox.showwarning('Warning!','Duplicate file');
+
+        if noduplicate == True:
+        #validating the data, making sure data has been entered into each field
+            if len(self.ID_field.get()) <1 or len(self.filename_field.get()) <1 or len(self.extension.get()) <1 or len(self.title_field.get()) <1 or len(self.owner_field.get()) <1 or len(self.license.get()) <1:
+                tkinter.messagebox.showwarning('Warning!','Please enter a valid value for all fields')
+            #validating the data, making sure data is no longer than 50 characters
+            if len(self.ID_field.get()) >50 or len(self.filename_field.get()) >50 or len(self.extension.get()) >50 or len(self.title_field.get()) >50 or len(self.owner_field.get()) >50 or len(self.license.get()) >50:
+                tkinter.messagebox.showwarning('Warning!','Please enter a maximum of 50 characters for each field')
+            else:
+                try:
+                    #validating the data, making sure the id is an integer
+                    validate_ID = int(self.ID_field.get())
+                    #adding the user input to the 'recordlist' list
+                    self.recordlist.append(Image(self.ID_field.get(),self.filename_field.get(), self.extension.get(), self.title_field.get(), self.owner_field.get(), self.license.get()))
+                    self.ready_to_write= True
+                    tkinter.messagebox.showinfo('Notice','Submission Successful')
+
+                    self.ID_field.delete(0, END) #command to clear field
+                    self.filename_field.delete(0, END)
+                    self.title_field.delete(0, END)
+                    self.owner_field.delete(0, END)
+                except:
+                        tkinter.messagebox.showwarning('Warning!','Please enter numeric ID number')
+
+
+    def writetocsv(self, option):
+        #this is the callback method for the 'write to csv' button
+        import csv
+        csv_file = 'imagesdb.csv'
+
+        if self.ready_to_write: #checks data has been previously validated i.e. self.ready_to_write = True
+            ofile = open(csv_file, option) #open either write or append, option called from button pressed
+            writer = csv.writer(ofile, delimiter=',', lineterminator='\n')
+            #cycles through list of records created by gui
+            for record in self.recordlist:
+                print(record.get_title())
+                writer.writerow([record.get_ID(),record.get_filename(), record.get_extension(), record.get_title(), record.get_owner(), record.get_license()])
+
+            tkinter.messagebox.showinfo('Notice', csv_file+ ' File Generated Successfully')
+            #explicitly closes the output file
+            ofile.close()
+        else:
+            tkinter.messagebox.showwarning('Error!', 'You need to validate your data')
+
+    def info(self):
+        # similar to root in other texts
+        new = Tk()
+        new.title("License Descriptions")
+        #setting root window and size
+        new.minsize(width=300, height=225)
+
+        group = LabelFrame(new, text="License types", height=150, width=150, padx=5, pady=5)
+        group.pack(padx=10, pady=10)
+
+        title_label = Label(group, text='Acronym')
+        title_label.grid(row=0, column=1, sticky ="w", padx=5)
+        title_label1 = Label(group, text='Description')
+        title_label1.grid(row=0, column=2, sticky="w", padx = 5)
+        title_label2 = Label(group, text='Free',)
+        title_label2.grid(row=0, column=3, sticky="w", padx = 5)
+
+        CC0_label = Label(group, text='CC0')
+        CC0_label.grid(row=1, column=1, sticky="w",  padx =5)
+        CC0_desc = Label(group, text ='Freeing content globally without restrictions')
+        CC0_desc.grid(row=1, column=2, sticky="w", padx =5)
+        CC0_free = Label(group, text='Yes')
+        CC0_free.grid(row=1,column=3, sticky="w", padx=5)
+
+        BY_label = Label(group, text='BY')
+        BY_label.grid(row=2, column=1, sticky="w", padx =5)
+        BY_desc = Label(group, text ='Attribution alone')
+        BY_desc.grid(row=2, column=2, sticky="w", padx =5)
+        BY_free = Label(group, text='Yes')
+        BY_free.grid(row=2,column=3, sticky="w", padx=5)
+
+        BYNC_label = Label(group, text='BY-NC')
+        BYNC_label.grid(row=3, column=1, sticky="w", padx =5)
+        BYNC_desc = Label(group, text ='Attribution + Noncommercial')
+        BYNC_desc.grid(row=3, column=2, sticky="w", padx =5)
+        BYNC_free = Label(group, text='No')
+        BYNC_free.grid(row=3,column=3, sticky="w", padx=5)
+
+        BYSA_label = Label(group, text='BY-SA')
+        BYSA_label.grid(row=4, column=1, sticky="w", padx =5)
+        BYSA_desc = Label(group, text ='Attribution + ShareAlike')
+        BYSA_desc.grid(row=4, column=2, sticky="w", padx =5)
+        BYSA_free = Label(group, text='Yes')
+        BYSA_free.grid(row=4,column=3, sticky="w", padx=5)
+
+        BYND_label = Label(group, text='BY-ND')
+        BYND_label.grid(row=5, column=1, sticky="w", padx =5)
+        BYND_desc = Label(group, text ='Attribution + NoDerivatives')
+        BYND_desc.grid(row=5, column=2, sticky="w", padx =5)
+        BYND_free = Label(group, text='No')
+        BYND_free.grid(row=5,column=3, sticky="w", padx=5)
+
+        BYNCSA_label = Label(group, text='BY-ND-SA')
+        BYNCSA_label.grid(row=6, column=1, sticky="w", padx =5)
+        BYNCSA_desc = Label(group, text ='Attribution + Noncommercial + ShareAlike')
+        BYNCSA_desc.grid(row=6, column=2, sticky="w", padx =5)
+        BYNCSA_free = Label(group, text='No')
+        BYNCSA_free.grid(row=6,column=3, sticky="w", padx=5)
+
+        BYNCND_label = Label(group, text='BY-NC-ND')
+        BYNCND_label.grid(row=7, column=1, sticky="w", padx =5)
+        BYNCND_desc = Label(group, text ='Freeing content globally without restrictions')
+        BYNCND_desc.grid(row=7, column=2, sticky="w", padx =5)
+        BYNCND_free = Label(group, text='No')
+        BYNCND_free.grid(row=7,column=3, sticky="w", padx=5)
+
+GUI()
